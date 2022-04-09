@@ -6,6 +6,7 @@ type Log struct {
 	Important bool     `yaml:"important"`
 	Url       *string  `yaml:"url,omitempty"`
 	Text      *string  `yaml:"-"`
+	SubLogs   *[]Log   `yaml:"subLogs,omitempty"`
 }
 
 func NewLog(name string, category Category) Log {
