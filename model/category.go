@@ -1,5 +1,9 @@
 package model
 
+import (
+	"github.com/gdamore/tcell/v2"
+)
+
 type Category string
 
 const (
@@ -30,4 +34,28 @@ func (c Category) Print() rune {
 		return '○'
 	}
 	return ' '
+}
+
+func (c Category) Color() tcell.Color {
+	switch {
+	case c == Task:
+		return tcell.NewRGBColor(234, 250, 250)
+	case c == Complete:
+		return tcell.ColorYellow
+	case c == Irrelevant:
+		return tcell.ColorYellow
+	case c == Migrated:
+		return tcell.ColorYellow
+	case c == Scheduled:
+		return tcell.ColorYellow
+	case c == Note:
+		return tcell.ColorYellow
+	case c == Event:
+		return tcell.ColorYellow
+	}
+	return tcell.ColorBlack
+}
+
+func (c Category) Style() tcell.Style {
+	return tcell.StyleDefault.Foreground(c.Color())
 }

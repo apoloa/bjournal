@@ -7,6 +7,7 @@ replace github.com/gdamore/tcell/v2 => github.com/derailed/tcell/v2 v2.3.1-rc.2
 require (
 	github.com/derailed/tview v0.6.6
 	github.com/gdamore/tcell/v2 v2.4.0
+	github.com/google/uuid v1.3.0
 	github.com/mattn/go-runewidth v0.0.13
 	github.com/rivo/uniseg v0.2.0
 	github.com/rs/zerolog v1.22.0

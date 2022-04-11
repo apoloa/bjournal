@@ -46,11 +46,11 @@ func (a *App) makeDayFlex() *tview.Flex {
 	timeNow := time.Now()
 	dl, _ := a.logService.ReadDay(timeNow)
 	list := ui.NewList()
-	for _, log := range dl.Logs {
-		list.AddItem(log.Name, "", log.Mark.Print(), nil).ShowSecondaryText(false)
+	for index, _ := range dl.Logs {
+		list.AddItem(&dl.Logs[index], nil)
 	}
 	list.SetBorder(true)
-	list.SetTitle(fmt.Sprintf("%v.%v %v", timeNow.Day(), timeNow.Month(), utils.ToShortString(timeNow.Weekday())))
+	list.SetTitle(fmt.Sprintf("%02d.%02d %v", timeNow.Day(), timeNow.Month(), utils.ToShortString(timeNow.Weekday())))
 	flex.AddItem(list, 0, 1, false)
 	a.dailyFlex = list
 	return flex
@@ -102,7 +102,7 @@ func (a *App) Show() {
 			} else if event.Key() == tcell.KeyRune && event.Rune() == 'c' {
 				index := a.dailyFlex.GetCurrentItem()
 				if index > 0 {
-					a.dailyFlex.GetItemText(index)
+					a.dailyFlex.GetItem(index)
 				}
 
 			} else {
@@ -128,12 +128,27 @@ func (a *App) BufferActive(state bool) {
 			log.Print("Buffer complete without selected category")
 			os.Exit(101)
 		}
+		var selectedLog *model.Log
+		index := a.dailyFlex.GetCurrentItem()
+		if index >= 0 {
+			selectedLog = a.dailyFlex.GetItem(index)
+			if selectedLog.Parent != nil {
+				selectedLog = selectedLog.Parent
+			}
+		}
 		text := a.buffer.GetText()
 		if len(text) != 0 {
-			_, err := a.logService.AddNewLog(time.Now(), text, *a.selectedCategory)
-			if err != nil {
-				log.Print("Error adding a new log", err, text)
-				return
+			if selectedLog != nil {
+				selectedLog.AppendNewSubLog(text, *a.selectedCategory)
+				_, err := a.logService.SaveLog(time.Now())
+				if err != nil {
+					return
+				}
+			} else {
+				_, err := a.logService.AddNewLog(time.Now(), text, *a.selectedCategory)
+				if err != nil {
+					return
+				}
 			}
 		}
 		a.showingPrompt = false

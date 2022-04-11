@@ -55,6 +55,25 @@ func (m *LogService) AddNewLog(date time.Time, name string, category model.Categ
 	dateString := parseDay(date)
 	dailyLog, _ := m.cache[dateString]
 	dailyLog.Logs = append(dailyLog.Logs, model.NewLog(name, category))
+	m.cache[dateString] = dailyLog
+	return m.SaveLog(date)
+}
+
+func (m *LogService) AppendNewLog(uuid string, date time.Time, name string, category model.Category) (model.DailyLog, error) {
+	dateString := parseDay(date)
+	dailyLog, _ := m.cache[dateString]
+	for index, appendLog := range dailyLog.Logs {
+		if appendLog.Id == uuid {
+			dailyLog.Logs[index].AppendNewSubLog(name, category)
+		}
+	}
+	m.cache[dateString] = dailyLog
+	return m.SaveLog(date)
+}
+
+func (m *LogService) SaveLog(date time.Time) (model.DailyLog, error) {
+	dateString := parseDay(date)
+	dailyLog, _ := m.cache[dateString]
 	filePath := path.Join(m.baseDir, fmt.Sprintf("%v.yaml", dateString))
 	bytes, err := dailyLog.ToBytes()
 	if err != nil {
@@ -64,6 +83,5 @@ func (m *LogService) AddNewLog(date time.Time, name string, category model.Categ
 	if err != nil {
 		return dailyLog, err
 	}
-	m.cache[dateString] = dailyLog
 	return dailyLog, nil
 }

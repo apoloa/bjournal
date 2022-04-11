@@ -1,6 +1,10 @@
 package model
 
+import "bjournal/utils"
+
 type Log struct {
+	Parent    *Log     `yaml:"-"`
+	Id        string   `yaml:"-"`
 	Name      string   `yaml:"name"`
 	Mark      Category `yaml:"mark"`
 	Important bool     `yaml:"important"`
@@ -17,4 +21,18 @@ func NewLog(name string, category Category) Log {
 		Url:       nil,
 		Text:      nil,
 	}
+}
+
+func (l Log) getName() string {
+	if l.Mark == Irrelevant {
+		return utils.Strikethrough(l.Name)
+	}
+	return l.Name
+}
+
+func (l *Log) AppendNewSubLog(name string, category Category) {
+	if l.SubLogs == nil {
+		l.SubLogs = &[]Log{}
+	}
+	*l.SubLogs = append(*l.SubLogs, NewLog(name, category))
 }

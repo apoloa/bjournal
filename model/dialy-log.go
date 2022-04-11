@@ -1,6 +1,7 @@
 package model
 
 import (
+	"github.com/google/uuid"
 	"gopkg.in/yaml.v3"
 	"io/ioutil"
 	"path"
@@ -34,6 +35,26 @@ func (d *DailyLog) fullRead() {
 	}
 }
 
+func (d *DailyLog) setParent() {
+	for _, parent := range d.Logs {
+		if parent.SubLogs == nil {
+			continue
+		}
+		if len(*parent.SubLogs) == 0 {
+			continue
+		}
+		for index, _ := range *parent.SubLogs {
+			(*parent.SubLogs)[index].Parent = &parent
+		}
+	}
+}
+
+func (d *DailyLog) addUUID() {
+	for index, _ := range d.Logs {
+		d.Logs[index].Id = uuid.NewString()
+	}
+}
+
 func DailyFrom(from []byte, date string, dir string) (DailyLog, error) {
 	dailyLog := DailyLog{}
 	err := yaml.Unmarshal(from, &dailyLog)
@@ -43,6 +64,8 @@ func DailyFrom(from []byte, date string, dir string) (DailyLog, error) {
 	dailyLog.key = date
 	dailyLog.basePath = dir
 	dailyLog.fullRead()
+	dailyLog.setParent()
+	dailyLog.addUUID()
 	return dailyLog, nil
 }
 
