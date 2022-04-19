@@ -6,8 +6,11 @@ import (
 	"github.com/rs/zerolog/log"
 	"io/ioutil"
 	"path"
+	"path/filepath"
 	"time"
 )
+
+const layout = "02.01.2006"
 
 type LogService struct {
 	baseDir string
@@ -22,13 +25,16 @@ func NewLogService(baseDir string) *LogService {
 	}
 }
 
-func parseDay(date time.Time) string {
+func timeToString(date time.Time) string {
 	return fmt.Sprintf("%02d.%02d.%v", date.Day(), int(date.Month()), date.Year())
 }
 
+func stringToTime(date string) (time.Time, error) {
+	return time.Parse(layout, date)
+}
+
 func (m *LogService) ReadDay(date time.Time) (model.DailyLog, error) {
-	dateString := parseDay(date)
-	log.Print(dateString)
+	dateString := timeToString(date)
 	if val, ok := m.cache[dateString]; ok {
 		return val, nil
 	} else {
@@ -53,7 +59,7 @@ func (m *LogService) ReadDailyLog(date string) (model.DailyLog, error) {
 }
 
 func (m *LogService) AddNewLog(date time.Time, name string, category model.Category) (model.DailyLog, error) {
-	dateString := parseDay(date)
+	dateString := timeToString(date)
 	dailyLog, _ := m.cache[dateString]
 	dailyLog.Logs = append(dailyLog.Logs, model.NewLog(name, category))
 	m.cache[dateString] = dailyLog
@@ -61,7 +67,7 @@ func (m *LogService) AddNewLog(date time.Time, name string, category model.Categ
 }
 
 func (m *LogService) AppendNewLog(uuid string, date time.Time, name string, category model.Category) (model.DailyLog, error) {
-	dateString := parseDay(date)
+	dateString := timeToString(date)
 	dailyLog, _ := m.cache[dateString]
 	for index, appendLog := range dailyLog.Logs {
 		if appendLog.Id == uuid {
@@ -72,12 +78,55 @@ func (m *LogService) AppendNewLog(uuid string, date time.Time, name string, cate
 	return m.SaveLog(date)
 }
 
-func (m *LogService) GetPreviousDate() (model.DailyLog, error) {
+func (m *LogService) getPreviousFileName() (string, error) {
+	files, err := ioutil.ReadDir(m.baseDir)
+	if err != nil {
+		log.Print(err)
+		return "", err
+	}
+	startTime := time.Time{}
+	previousFileName := ""
+	actualDate := timeToString(time.Now())
+	for _, file := range files {
+		if !file.IsDir() {
+			filename := file.Name()
+			extension := filepath.Ext(filename)
+			dateName := filename[0 : len(filename)-len(extension)]
+			if dateName == actualDate {
+				continue
+			}
+			toTime, err := stringToTime(dateName)
+			if err != nil {
+				continue
+			}
+			if startTime.Before(toTime) {
+				startTime = toTime
+				previousFileName = filename
+			}
+		}
+	}
+	return previousFileName, nil
+}
 
+func (m *LogService) GetPreviousDate() (model.DailyLog, error) {
+	dateString, err := m.getPreviousFileName()
+	if err != nil {
+		return model.DailyLog{}, err
+	}
+	if val, ok := m.cache[dateString]; ok {
+		return val, nil
+	} else {
+		dailyLog, err := m.ReadDailyLog(dateString)
+		if err != nil {
+			return model.DailyLog{}, err
+		}
+		m.cache[dateString] = dailyLog
+		return dailyLog, nil
+	}
 }
 
 func (m *LogService) SaveLog(date time.Time) (model.DailyLog, error) {
-	dateString := parseDay(date)
+	dateString := timeToString(date)
 	dailyLog, _ := m.cache[dateString]
 	filePath := path.Join(m.baseDir, fmt.Sprintf("%v.yaml", dateString))
 	bytes, err := dailyLog.ToBytes()

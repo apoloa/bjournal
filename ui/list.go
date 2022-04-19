@@ -446,13 +446,8 @@ func (l *List) Draw(screen tcell.Screen) {
 		bottomLimit = totalHeight
 	}
 
-	for _, item := range l.items {
-		if item.Mark.Print() != 0 {
-			x += 4
-			width -= 4
-			break
-		}
-	}
+	x += 4
+	width -= 4
 
 	// Adjust offset to keep the current selection in view.
 	if l.currentItem < l.itemOffset {
