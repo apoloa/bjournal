@@ -39,19 +39,19 @@ func (c Category) Print() rune {
 func (c Category) Color() tcell.Color {
 	switch {
 	case c == Task:
-		return tcell.NewRGBColor(234, 250, 250)
+		return tcell.ColorCadetBlue
 	case c == Complete:
-		return tcell.ColorYellow
+		return tcell.ColorYellowGreen
 	case c == Irrelevant:
 		return tcell.ColorYellow
 	case c == Migrated:
-		return tcell.ColorYellow
+		return tcell.ColorOrangeRed
 	case c == Scheduled:
 		return tcell.ColorYellow
 	case c == Note:
-		return tcell.ColorYellow
+		return tcell.ColorHotPink
 	case c == Event:
-		return tcell.ColorYellow
+		return tcell.ColorRebeccaPurple
 	}
 	return tcell.ColorBlack
 }

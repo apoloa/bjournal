@@ -533,7 +533,7 @@ func (l *List) Draw(screen tcell.Screen) {
 						}
 					}
 
-					mainTextColor, _, _ := l.secondaryTextStyle.Decompose()
+					mainTextColor, _, _ := l.mainTextStyle.Decompose()
 					for bx := 0; bx < textWidth; bx++ {
 						m, c, style, _ := screen.GetContent(x+3+bx, y)
 						fg, _, _ := style.Decompose()
@@ -577,6 +577,15 @@ func (l *List) increaseIndex() {
 					l.currentItem++
 				}
 
+			}
+
+		} else {
+			if l.currentItem > len(l.items)-1 {
+				l.currentItem = -1
+				l.secondaryIndex = -1
+			} else {
+				l.currentItem++
+				l.secondaryIndex = -1
 			}
 
 		}
