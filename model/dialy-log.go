@@ -36,7 +36,7 @@ func (d *DailyLog) fullRead() {
 }
 
 func (d *DailyLog) setParent() {
-	for _, parent := range d.Logs {
+	for id, parent := range d.Logs {
 		if parent.SubLogs == nil {
 			continue
 		}
@@ -44,7 +44,7 @@ func (d *DailyLog) setParent() {
 			continue
 		}
 		for index, _ := range *parent.SubLogs {
-			(*parent.SubLogs)[index].Parent = &parent
+			(*parent.SubLogs)[index].Parent = &d.Logs[id]
 		}
 	}
 }

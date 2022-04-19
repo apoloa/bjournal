@@ -23,7 +23,7 @@ func NewLog(name string, category Category) Log {
 	}
 }
 
-func (l Log) getName() string {
+func (l Log) GetName() string {
 	if l.Mark == Irrelevant {
 		return utils.Strikethrough(l.Name)
 	}
@@ -35,4 +35,16 @@ func (l *Log) AppendNewSubLog(name string, category Category) {
 		l.SubLogs = &[]Log{}
 	}
 	*l.SubLogs = append(*l.SubLogs, NewLog(name, category))
+}
+
+func (l *Log) MarkAsComplete() {
+	if l.Mark == Task {
+		l.Mark = Complete
+	}
+}
+
+func (l *Log) MarkAsIrrelevant() {
+	if l.Mark == Task {
+		l.Mark = Irrelevant
+	}
 }

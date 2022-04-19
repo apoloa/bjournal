@@ -45,12 +45,11 @@ func (a *App) makeDayFlex() *tview.Flex {
 	flex := tview.NewFlex()
 	timeNow := time.Now()
 	dl, _ := a.logService.ReadDay(timeNow)
-	list := ui.NewList()
-	for index, _ := range dl.Logs {
-		list.AddItem(&dl.Logs[index], nil)
-	}
-	list.SetBorder(true)
-	list.SetTitle(fmt.Sprintf("%02d.%02d %v", timeNow.Day(), timeNow.Month(), utils.ToShortString(timeNow.Weekday())))
+	list := ui.NewList().
+		AddDailyLog(&dl)
+	list.
+		SetBorder(true).
+		SetTitle(fmt.Sprintf("%02d.%02d %v", timeNow.Day(), timeNow.Month(), utils.ToShortString(timeNow.Weekday())))
 	flex.AddItem(list, 0, 1, false)
 	a.dailyFlex = list
 	return flex
@@ -100,11 +99,23 @@ func (a *App) Show() {
 				a.selectedCategory = &category
 				a.showPrompt()
 			} else if event.Key() == tcell.KeyRune && event.Rune() == 'c' {
-				index := a.dailyFlex.GetCurrentItem()
-				if index > 0 {
-					a.dailyFlex.GetItem(index)
+				actualLog := a.dailyFlex.GetCurrentLog()
+				if actualLog != nil {
+					actualLog.MarkAsComplete()
+					_, err := a.logService.SaveLog(time.Now())
+					if err != nil {
+						log.Print("Error saving log", err)
+					}
 				}
-
+			} else if event.Key() == tcell.KeyRune && event.Rune() == 'i' {
+				actualLog := a.dailyFlex.GetCurrentLog()
+				if actualLog != nil {
+					actualLog.MarkAsIrrelevant()
+					_, err := a.logService.SaveLog(time.Now())
+					if err != nil {
+						log.Print("Error saving log", err)
+					}
+				}
 			} else {
 				handler := a.dailyFlex.InputHandler()
 				handler(event, func(p tview.Primitive) {})

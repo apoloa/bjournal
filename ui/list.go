@@ -307,6 +307,13 @@ func (l *List) SetDoneFunc(handler func()) *List {
 	return l
 }
 
+func (l *List) AddDailyLog(dailyLog *model.DailyLog) *List {
+	for index, _ := range dailyLog.Logs {
+		l.InsertItem(-1, &dailyLog.Logs[index], nil)
+	}
+	return l
+}
+
 // AddItem calls InsertItem() with an index of -1.
 func (l *List) AddItem(log *model.Log, selected func()) *List {
 	l.InsertItem(-1, log, selected)
@@ -375,6 +382,28 @@ func (l *List) GetItem(index int) *model.Log {
 		return nil
 	}
 	return l.items[index]
+}
+
+func (l *List) GetCurrentLog() *model.Log {
+	if l.currentItem < 0 {
+		return nil
+	} else if l.currentItem > len(l.items) {
+		return nil
+	}
+
+	item := l.items[l.currentItem]
+
+	if item.SubLogs == nil {
+		return item
+	}
+
+	if l.secondaryIndex < 0 {
+		return item
+	} else if l.secondaryIndex > len(*item.SubLogs) {
+		return item
+	}
+
+	return &(*item.SubLogs)[l.secondaryIndex]
 }
 
 // SetItemText sets an item's main and secondary text. Panics if the index is
