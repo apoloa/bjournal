@@ -12,6 +12,7 @@ import (
 type LogService struct {
 	baseDir string
 	cache   map[string]model.DailyLog
+	index   model.Index
 }
 
 func NewLogService(baseDir string) *LogService {
@@ -71,6 +72,10 @@ func (m *LogService) AppendNewLog(uuid string, date time.Time, name string, cate
 	return m.SaveLog(date)
 }
 
+func (m *LogService) GetPreviousDate() (model.DailyLog, error) {
+
+}
+
 func (m *LogService) SaveLog(date time.Time) (model.DailyLog, error) {
 	dateString := parseDay(date)
 	dailyLog, _ := m.cache[dateString]
@@ -79,7 +84,7 @@ func (m *LogService) SaveLog(date time.Time) (model.DailyLog, error) {
 	if err != nil {
 		return dailyLog, err
 	}
-	err = ioutil.WriteFile(filePath, bytes, 0777)
+	err = ioutil.WriteFile(filePath, bytes, 0666)
 	if err != nil {
 		return dailyLog, err
 	}
