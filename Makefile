@@ -17,8 +17,8 @@ build:
 	@go build -o bin/bj .
 
 install:
-	@rm -rf /opt/ep/ep
-	@cp -Rf  ./bin/. /opt/ep
+	@rm -rf /opt/bj/bj
+	@cp -Rf  ./bin/. /opt/bj
 
 test:
 	@go test ./...
