@@ -1,4 +1,4 @@
-module bjournal
+module github.com/apoloa/bjournal
 
 go 1.17
 
