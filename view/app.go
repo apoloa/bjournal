@@ -14,15 +14,17 @@ import (
 )
 
 type App struct {
-	logService       *service.LogService
-	prompt           *ui.Prompt
-	buffer           *model.CmdBuff
-	app              *tview.Application
-	mainFlex         *tview.Flex
-	dailyList        *ui.List
-	showingPrompt    bool
-	showPreviousDay  bool
-	selectedCategory *model.Category
+	logService          *service.LogService
+	prompt              *ui.Prompt
+	buffer              *model.CmdBuff
+	app                 *tview.Application
+	mainFlex            *tview.Flex
+	dailyList           *ui.List
+	previousDayList     *ui.List
+	showingPrompt       bool
+	showPreviousDay     bool
+	selectedPreviousDay bool
+	selectedCategory    *model.Category
 }
 
 func NewApp(logService *service.LogService) *App {
@@ -50,7 +52,13 @@ func (a *App) makeDayFlex(fetchFromCache bool) *tview.Flex {
 		previousList := ui.NewList().AddDailyLog(&previousDate)
 		previousList.
 			SetBorder(true).
-			SetTitle(fmt.Sprintf("%02d.%02d %v", timeNow.Day(), timeNow.Month(), utils.ToShortString(timeNow.Weekday())))
+			SetTitle(fmt.Sprintf("%02d.%02d %v", previousDate.Date.Day(), previousDate.Date.Month(), utils.ToShortString(timeNow.Weekday())))
+		if a.selectedPreviousDay {
+			previousList.SetBorderColor(tcell.ColorBlue)
+		} else {
+			previousList.SetBorderColor(tcell.ColorWhite)
+		}
+		a.previousDayList = previousList
 		flex.AddItem(previousList, 0, 1, false)
 	}
 	if fetchFromCache {
@@ -59,8 +67,13 @@ func (a *App) makeDayFlex(fetchFromCache bool) *tview.Flex {
 			AddDailyLog(&dl)
 		list.
 			SetBorder(true).
-			SetTitle(fmt.Sprintf("%02d.%02d %v", timeNow.Day(), timeNow.Month(), utils.ToShortString(timeNow.Weekday())))
+			SetTitle(fmt.Sprintf("%02d.%02d %v", dl.Date.Day(), dl.Date.Month(), utils.ToShortString(dl.Date.Weekday())))
 		a.dailyList = list
+	}
+	if !a.selectedPreviousDay {
+		a.dailyList.SetBorderColor(tcell.ColorBlue)
+	} else {
+		a.dailyList.SetBorderColor(tcell.ColorWhite)
 	}
 	flex.AddItem(a.dailyList, 0, 1, false)
 	return flex
@@ -110,29 +123,70 @@ func (a *App) Show() {
 				a.selectedCategory = &category
 				a.showPrompt()
 			case event.Key() == tcell.KeyRune && event.Rune() == 'c':
-				actualLog := a.dailyList.GetCurrentLog()
+				var actualLog *model.Log
+				var dateTime time.Time
+				if a.selectedPreviousDay {
+					actualLog = a.previousDayList.GetCurrentLog()
+					dateTime = a.previousDayList.GetDaily().Date
+				} else {
+					actualLog = a.dailyList.GetCurrentLog()
+					dateTime = a.dailyList.GetDaily().Date
+				}
 				if actualLog != nil {
 					actualLog.MarkAsComplete()
-					_, err := a.logService.SaveLog(time.Now())
+					_, err := a.logService.SaveLog(dateTime)
 					if err != nil {
 						log.Print("Error saving log", err)
 					}
 				}
 			case event.Key() == tcell.KeyRune && event.Rune() == 'i':
-				actualLog := a.dailyList.GetCurrentLog()
+				var actualLog *model.Log
+				var dateTime time.Time
+				if a.selectedPreviousDay {
+					actualLog = a.previousDayList.GetCurrentLog()
+					dateTime = a.previousDayList.GetDaily().Date
+				} else {
+					actualLog = a.dailyList.GetCurrentLog()
+					dateTime = a.dailyList.GetDaily().Date
+				}
 				if actualLog != nil {
 					actualLog.MarkAsIrrelevant()
-					_, err := a.logService.SaveLog(time.Now())
+					_, err := a.logService.SaveLog(dateTime)
 					if err != nil {
 						log.Print("Error saving log", err)
+					}
+				}
+			case event.Key() == tcell.KeyRune && event.Rune() == 'm':
+				if a.selectedPreviousDay {
+					previousLog := a.previousDayList.GetCurrentLog()
+					if previousLog != nil {
+						previousLog.MarkAsMigrated()
+						_, err := a.logService.SaveLog(a.previousDayList.GetDaily().Date)
+						if err != nil {
+							log.Print("Error saving log", err)
+						}
 					}
 				}
 			case event.Key() == tcell.KeyCtrlI:
 				a.showPreviousDay = !a.showPreviousDay
 				a.rebuild(false)
+				if !a.showPreviousDay {
+					a.selectedPreviousDay = false
+				}
+			case event.Key() == tcell.KeyCtrlJ:
+				if a.showPreviousDay {
+					a.selectedPreviousDay = !a.selectedPreviousDay
+					a.rebuild(true)
+				}
 			default:
-				handler := a.dailyList.InputHandler()
-				handler(event, func(p tview.Primitive) {})
+				if a.selectedPreviousDay {
+					handler := a.previousDayList.InputHandler()
+					handler(event, func(p tview.Primitive) {})
+				} else {
+					handler := a.dailyList.InputHandler()
+					handler(event, func(p tview.Primitive) {})
+				}
+
 			}
 		}
 		return event

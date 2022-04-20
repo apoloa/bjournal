@@ -48,3 +48,9 @@ func (l *Log) MarkAsIrrelevant() {
 		l.Mark = Irrelevant
 	}
 }
+
+func (l *Log) MarkAsMigrated() {
+	if l.Mark == Task {
+		l.Mark = Migrated
+	}
+}

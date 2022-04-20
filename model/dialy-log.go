@@ -5,18 +5,21 @@ import (
 	"gopkg.in/yaml.v3"
 	"io/ioutil"
 	"path"
+	"time"
 )
 
 type DailyLog struct {
-	key      string `yaml:"-"`
-	basePath string `yaml:"-"`
-	Logs     []Log  `yaml:"items"`
+	key      string    `yaml:"-"`
+	basePath string    `yaml:"-"`
+	Date     time.Time `yaml:"-"`
+	Logs     []Log     `yaml:"items"`
 }
 
 func NewDailyLog(date, basePath string) DailyLog {
 	return DailyLog{
 		key:      date,
 		basePath: basePath,
+		Date:     time.Now(),
 		Logs:     []Log{},
 	}
 }
@@ -55,13 +58,14 @@ func (d *DailyLog) addUUID() {
 	}
 }
 
-func DailyFrom(from []byte, date string, dir string) (DailyLog, error) {
+func DailyFrom(from []byte, dateTime time.Time, date string, dir string) (DailyLog, error) {
 	dailyLog := DailyLog{}
 	err := yaml.Unmarshal(from, &dailyLog)
 	if err != nil {
 		return dailyLog, err
 	}
 	dailyLog.key = date
+	dailyLog.Date = dateTime
 	dailyLog.basePath = dir
 	dailyLog.fullRead()
 	dailyLog.setParent()

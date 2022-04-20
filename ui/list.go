@@ -17,6 +17,8 @@ type List struct {
 	// The items of the list.
 	items []*model.Log
 
+	daily *model.DailyLog
+
 	// The index of the currently selected item.
 	currentItem int
 
@@ -311,6 +313,7 @@ func (l *List) AddDailyLog(dailyLog *model.DailyLog) *List {
 	for index, _ := range dailyLog.Logs {
 		l.InsertItem(-1, &dailyLog.Logs[index], nil)
 	}
+	l.daily = dailyLog
 	return l
 }
 
@@ -382,6 +385,10 @@ func (l *List) GetItem(index int) *model.Log {
 		return nil
 	}
 	return l.items[index]
+}
+
+func (l *List) GetDaily() *model.DailyLog {
+	return l.daily
 }
 
 func (l *List) GetCurrentLog() *model.Log {

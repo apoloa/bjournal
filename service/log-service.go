@@ -38,7 +38,7 @@ func (m *LogService) ReadDay(date time.Time) (model.DailyLog, error) {
 	if val, ok := m.cache[dateString]; ok {
 		return val, nil
 	} else {
-		dailyLog, err := m.ReadDailyLog(dateString)
+		dailyLog, err := m.ReadDailyLog(date, dateString)
 		if err != nil {
 			return model.DailyLog{}, err
 		}
@@ -47,7 +47,7 @@ func (m *LogService) ReadDay(date time.Time) (model.DailyLog, error) {
 	}
 }
 
-func (m *LogService) ReadDailyLog(date string) (model.DailyLog, error) {
+func (m *LogService) ReadDailyLog(dateTime time.Time, date string) (model.DailyLog, error) {
 	filePath := path.Join(m.baseDir, fmt.Sprintf("%v.yaml", date))
 	file, err := ioutil.ReadFile(filePath)
 	if err != nil {
@@ -55,7 +55,7 @@ func (m *LogService) ReadDailyLog(date string) (model.DailyLog, error) {
 		log.Print(err.Error())
 		return model.NewDailyLog(date, m.baseDir), nil
 	}
-	return model.DailyFrom(file, date, m.baseDir)
+	return model.DailyFrom(file, dateTime, date, m.baseDir)
 }
 
 func (m *LogService) AddNewLog(date time.Time, name string, category model.Category) (model.DailyLog, error) {
@@ -78,11 +78,11 @@ func (m *LogService) AppendNewLog(uuid string, date time.Time, name string, cate
 	return m.SaveLog(date)
 }
 
-func (m *LogService) getPreviousFileName() (string, error) {
+func (m *LogService) getPreviousFileName() (time.Time, string, error) {
 	files, err := ioutil.ReadDir(m.baseDir)
 	if err != nil {
 		log.Print(err)
-		return "", err
+		return time.Now(), "", err
 	}
 	startTime := time.Time{}
 	previousFileName := ""
@@ -105,18 +105,18 @@ func (m *LogService) getPreviousFileName() (string, error) {
 			}
 		}
 	}
-	return previousFileName, nil
+	return startTime, previousFileName, nil
 }
 
 func (m *LogService) GetPreviousDate() (model.DailyLog, error) {
-	dateString, err := m.getPreviousFileName()
+	date, dateString, err := m.getPreviousFileName()
 	if err != nil {
 		return model.DailyLog{}, err
 	}
 	if val, ok := m.cache[dateString]; ok {
 		return val, nil
 	} else {
-		dailyLog, err := m.ReadDailyLog(dateString)
+		dailyLog, err := m.ReadDailyLog(date, dateString)
 		if err != nil {
 			return model.DailyLog{}, err
 		}

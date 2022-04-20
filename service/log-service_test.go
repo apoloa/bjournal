@@ -64,7 +64,7 @@ func TestLoadPreviousDay(t *testing.T) {
 
 	logService := NewLogService(dir)
 
-	name, err := logService.getPreviousFileName()
+	_, name, err := logService.getPreviousFileName()
 	assert.Equal(t, timeToString(time.Now().Add(-24*time.Hour)), name)
 	assert.Nil(t, err)
 
