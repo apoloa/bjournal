@@ -11,7 +11,7 @@ import (
 )
 
 const (
-	defaultPrompt = "%c> [::b]%s"
+	defaultPrompt = "%c > [::b]%s"
 	defaultSpacer = 4
 )
 
@@ -136,22 +136,6 @@ func (p *Prompt) keyboard(evt *tcell.EventKey) *tcell.EventKey {
 		p.model.SetActive(false)
 	case tcell.KeyCtrlW, tcell.KeyCtrlU:
 		p.model.ClearText(true)
-		/*
-			case tcell.KeyUp:
-				if s, ok := m.NextSuggestion(); ok {
-					p.suggest(p.model.GetText(), s)
-				}
-			case tcell.KeyDown:
-				if s, ok := m.PrevSuggestion(); ok {
-					p.suggest(p.model.GetText(), s)
-				}
-
-			case tcell.KeyTab, tcell.KeyRight, tcell.KeyCtrlF:
-				if s, ok := m.CurrentSuggestion(); ok {
-					p.model.SetText(p.model.GetText() + s)
-					m.ClearSuggestions()
-				}
-		*/
 	}
 
 	return nil
@@ -191,9 +175,6 @@ func (p *Prompt) suggest(text, suggestion string) {
 func (p *Prompt) write(text string) {
 	p.SetCursorIndex(p.spacer + len(text))
 	txt := text
-	/*if suggest != "" {
-		txt += fmt.Sprintf("[%s::-]%s", tcell.ColorWhite, suggest)
-	}*/
 	fmt.Fprintf(p, defaultPrompt, p.icon, txt)
 }
 
@@ -217,7 +198,6 @@ func (p *Prompt) BufferActive(activate bool) {
 		p.SetBorder(true)
 		p.SetTextColor(tcell.ColorWhite)
 		p.SetBorderColor(tcell.ColorBlue)
-		p.icon = '🐶'
 		p.activate()
 		return
 	}
@@ -228,15 +208,6 @@ func (p *Prompt) BufferActive(activate bool) {
 	p.Clear()
 }
 
-func (p *Prompt) iconFor(item bool) rune {
-	if p.noIcons {
-		return ' '
-	}
-
-	// nolint:exhaustive
-	if item {
-		return '🐩'
-	} else {
-		return '🐶'
-	}
+func (p *Prompt) SetIcon(icon rune) {
+	p.icon = icon
 }

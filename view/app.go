@@ -72,11 +72,12 @@ func (a *App) showPrompt() {
 }
 
 func (a *App) rebuild(fetchFromCache bool) {
-	a.prompt = ui.NewPrompt(false)
-	a.prompt.SetModel(a.buffer)
 	itemsFlex := a.makeDayFlex(fetchFromCache)
 	a.mainFlex.Clear()
 	if a.showingPrompt {
+		a.prompt = ui.NewPrompt(false)
+		a.prompt.SetModel(a.buffer)
+		a.prompt.SetIcon(a.selectedCategory.Print())
 		a.mainFlex.
 			AddItemAtIndex(0, a.prompt, 3, 1, false)
 	}
@@ -98,14 +99,17 @@ func (a *App) Show() {
 			if event.Key() == tcell.KeyRune && event.Rune() == 't' {
 				category := model.Task
 				a.selectedCategory = &category
+				a.prompt.SetIcon(a.selectedCategory.Print())
 				a.showPrompt()
 			} else if event.Key() == tcell.KeyRune && event.Rune() == 'n' {
 				category := model.Note
 				a.selectedCategory = &category
+				a.prompt.SetIcon(a.selectedCategory.Print())
 				a.showPrompt()
 			} else if event.Key() == tcell.KeyRune && event.Rune() == 'e' {
 				category := model.Event
 				a.selectedCategory = &category
+				a.prompt.SetIcon(a.selectedCategory.Print())
 				a.showPrompt()
 			} else if event.Key() == tcell.KeyRune && event.Rune() == 'c' {
 				actualLog := a.dailyList.GetCurrentLog()
