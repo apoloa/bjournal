@@ -6,6 +6,8 @@ import (
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"os"
+	"path"
+	"path/filepath"
 )
 
 /*
@@ -29,12 +31,17 @@ func makeWeekFlex(m *model.Model) *tview.Flex {
 
 func main() {
 	mod := os.O_CREATE | os.O_APPEND | os.O_WRONLY
-	file, err := os.OpenFile("main.log", mod, 0777)
+	executablePath, err := os.Executable()
+	if err != nil {
+		panic(err)
+	}
+	exePath := filepath.Dir(executablePath)
+	mainPath := path.Join(exePath, "main.log")
+	file, err := os.OpenFile(mainPath, mod, 0777)
 	if err != nil {
 		log.Printf("Error %v \n", err)
 		log.Fatal()
 	}
-
 	log.Logger = log.Output(zerolog.ConsoleWriter{Out: file})
 
 	m := service.NewLogService("/Users/apoloalcaide/Developer/Journal/bullet")

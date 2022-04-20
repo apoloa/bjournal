@@ -19,8 +19,9 @@ type App struct {
 	buffer           *model.CmdBuff
 	app              *tview.Application
 	mainFlex         *tview.Flex
-	dailyFlex        *ui.List
+	dailyList        *ui.List
 	showingPrompt    bool
+	showPreviousDay  bool
 	selectedCategory *model.Category
 }
 
@@ -41,47 +42,55 @@ func NewApp(logService *service.LogService) *App {
 	return app
 }
 
-func (a *App) makeDayFlex() *tview.Flex {
+func (a *App) makeDayFlex(fetchFromCache bool) *tview.Flex {
 	flex := tview.NewFlex()
 	timeNow := time.Now()
-	dl, _ := a.logService.ReadDay(timeNow)
-	list := ui.NewList().
-		AddDailyLog(&dl)
-	list.
-		SetBorder(true).
-		SetTitle(fmt.Sprintf("%02d.%02d %v", timeNow.Day(), timeNow.Month(), utils.ToShortString(timeNow.Weekday())))
-	flex.AddItem(list, 0, 1, false)
-	a.dailyFlex = list
+	if a.showPreviousDay {
+		previousDate, _ := a.logService.GetPreviousDate()
+		previousList := ui.NewList().AddDailyLog(&previousDate)
+		previousList.
+			SetBorder(true).
+			SetTitle(fmt.Sprintf("%02d.%02d %v", timeNow.Day(), timeNow.Month(), utils.ToShortString(timeNow.Weekday())))
+		flex.AddItem(previousList, 0, 1, false)
+	}
+	if fetchFromCache {
+		dl, _ := a.logService.ReadDay(timeNow)
+		list := ui.NewList().
+			AddDailyLog(&dl)
+		list.
+			SetBorder(true).
+			SetTitle(fmt.Sprintf("%02d.%02d %v", timeNow.Day(), timeNow.Month(), utils.ToShortString(timeNow.Weekday())))
+		a.dailyList = list
+	}
+	flex.AddItem(a.dailyList, 0, 1, false)
 	return flex
 }
 
 func (a *App) showPrompt() {
-	if a.mainFlex.ItemAt(0) != a.prompt {
-		a.mainFlex.Clear()
-		a.mainFlex.
-			AddItemAtIndex(0, a.prompt, 3, 1, false).
-			AddItem(a.dailyFlex, 0, 1, false)
-	}
 	a.showingPrompt = true
+	a.rebuild(false)
 }
 
-func (a *App) rebuild() {
+func (a *App) rebuild(fetchFromCache bool) {
 	a.prompt = ui.NewPrompt(false)
 	a.prompt.SetModel(a.buffer)
-	a.makeDayFlex()
+	itemsFlex := a.makeDayFlex(fetchFromCache)
 	a.mainFlex.Clear()
-	a.mainFlex.AddItem(a.dailyFlex, 0, 1, false)
+	if a.showingPrompt {
+		a.mainFlex.
+			AddItemAtIndex(0, a.prompt, 3, 1, false)
+	}
+	a.mainFlex.AddItem(itemsFlex, 0, 1, false)
 }
 
 func (a *App) hidePrompt() {
-	a.mainFlex.Clear()
-	a.mainFlex.AddItem(a.dailyFlex, 0, 1, false)
 	a.showingPrompt = false
+	a.rebuild(false)
 }
 
 func (a *App) Show() {
 
-	a.rebuild()
+	a.rebuild(true)
 	a.app.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
 		if a.showingPrompt {
 			a.prompt.GetInputCapture()(event)
@@ -99,7 +108,7 @@ func (a *App) Show() {
 				a.selectedCategory = &category
 				a.showPrompt()
 			} else if event.Key() == tcell.KeyRune && event.Rune() == 'c' {
-				actualLog := a.dailyFlex.GetCurrentLog()
+				actualLog := a.dailyList.GetCurrentLog()
 				if actualLog != nil {
 					actualLog.MarkAsComplete()
 					_, err := a.logService.SaveLog(time.Now())
@@ -108,7 +117,7 @@ func (a *App) Show() {
 					}
 				}
 			} else if event.Key() == tcell.KeyRune && event.Rune() == 'i' {
-				actualLog := a.dailyFlex.GetCurrentLog()
+				actualLog := a.dailyList.GetCurrentLog()
 				if actualLog != nil {
 					actualLog.MarkAsIrrelevant()
 					_, err := a.logService.SaveLog(time.Now())
@@ -116,8 +125,11 @@ func (a *App) Show() {
 						log.Print("Error saving log", err)
 					}
 				}
+			} else if event.Key() == tcell.KeyCtrlI {
+				a.showPreviousDay = !a.showPreviousDay
+				a.rebuild(false)
 			} else {
-				handler := a.dailyFlex.InputHandler()
+				handler := a.dailyList.InputHandler()
 				handler(event, func(p tview.Primitive) {})
 			}
 		}
@@ -140,9 +152,9 @@ func (a *App) BufferActive(state bool) {
 			os.Exit(101)
 		}
 		var selectedLog *model.Log
-		index := a.dailyFlex.GetCurrentItem()
+		index := a.dailyList.GetCurrentItem()
 		if index >= 0 {
-			selectedLog = a.dailyFlex.GetItem(index)
+			selectedLog = a.dailyList.GetItem(index)
 			if selectedLog.Parent != nil {
 				selectedLog = selectedLog.Parent
 			}
@@ -165,6 +177,6 @@ func (a *App) BufferActive(state bool) {
 		a.showingPrompt = false
 		a.buffer.ClearText(true)
 		a.hidePrompt()
-		a.rebuild()
+		a.rebuild(true)
 	}
 }

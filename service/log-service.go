@@ -101,7 +101,7 @@ func (m *LogService) getPreviousFileName() (string, error) {
 			}
 			if startTime.Before(toTime) {
 				startTime = toTime
-				previousFileName = filename
+				previousFileName = dateName
 			}
 		}
 	}
