@@ -96,22 +96,20 @@ func (a *App) Show() {
 		if a.showingPrompt {
 			a.prompt.GetInputCapture()(event)
 		} else {
-			if event.Key() == tcell.KeyRune && event.Rune() == 't' {
+			switch {
+			case event.Key() == tcell.KeyRune && event.Rune() == 't':
 				category := model.Task
 				a.selectedCategory = &category
-				a.prompt.SetIcon(a.selectedCategory.Print())
 				a.showPrompt()
-			} else if event.Key() == tcell.KeyRune && event.Rune() == 'n' {
+			case event.Key() == tcell.KeyRune && event.Rune() == 'n':
 				category := model.Note
 				a.selectedCategory = &category
-				a.prompt.SetIcon(a.selectedCategory.Print())
 				a.showPrompt()
-			} else if event.Key() == tcell.KeyRune && event.Rune() == 'e' {
+			case event.Key() == tcell.KeyRune && event.Rune() == 'e':
 				category := model.Event
 				a.selectedCategory = &category
-				a.prompt.SetIcon(a.selectedCategory.Print())
 				a.showPrompt()
-			} else if event.Key() == tcell.KeyRune && event.Rune() == 'c' {
+			case event.Key() == tcell.KeyRune && event.Rune() == 'c':
 				actualLog := a.dailyList.GetCurrentLog()
 				if actualLog != nil {
 					actualLog.MarkAsComplete()
@@ -120,7 +118,7 @@ func (a *App) Show() {
 						log.Print("Error saving log", err)
 					}
 				}
-			} else if event.Key() == tcell.KeyRune && event.Rune() == 'i' {
+			case event.Key() == tcell.KeyRune && event.Rune() == 'i':
 				actualLog := a.dailyList.GetCurrentLog()
 				if actualLog != nil {
 					actualLog.MarkAsIrrelevant()
@@ -129,10 +127,10 @@ func (a *App) Show() {
 						log.Print("Error saving log", err)
 					}
 				}
-			} else if event.Key() == tcell.KeyCtrlI {
+			case event.Key() == tcell.KeyCtrlI:
 				a.showPreviousDay = !a.showPreviousDay
 				a.rebuild(false)
-			} else {
+			default:
 				handler := a.dailyList.InputHandler()
 				handler(event, func(p tview.Primitive) {})
 			}
