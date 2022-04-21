@@ -1,6 +1,6 @@
 package model
 
-import "bjournal/utils"
+import "github.com/apoloa/bjournal/utils"
 
 type Log struct {
 	Parent    *Log     `yaml:"-"`

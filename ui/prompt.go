@@ -1,9 +1,9 @@
 package ui
 
 import (
-	"bjournal/model"
 	"context"
 	"fmt"
+	"github.com/apoloa/bjournal/model"
 	"sync"
 
 	"github.com/derailed/tview"

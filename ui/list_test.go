@@ -1,7 +1,7 @@
 package ui
 
 import (
-	"bjournal/model"
+	"github.com/apoloa/bjournal/model"
 	"testing"
 )
 

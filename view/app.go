@@ -1,11 +1,11 @@
 package view
 
 import (
-	"bjournal/model"
-	"bjournal/service"
-	"bjournal/ui"
-	"bjournal/utils"
 	"fmt"
+	"github.com/apoloa/bjournal/model"
+	"github.com/apoloa/bjournal/service"
+	"github.com/apoloa/bjournal/ui"
+	"github.com/apoloa/bjournal/utils"
 	"github.com/derailed/tview"
 	"github.com/gdamore/tcell/v2"
 	"github.com/rs/zerolog/log"

@@ -1,8 +1,8 @@
 package service
 
 import (
-	"bjournal/model"
 	"fmt"
+	"github.com/apoloa/bjournal/model"
 	"github.com/rs/zerolog/log"
 	"io/ioutil"
 	"path"

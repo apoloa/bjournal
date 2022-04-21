@@ -1,8 +1,8 @@
 package main
 
 import (
-	"bjournal/service"
-	"bjournal/view"
+	"github.com/apoloa/bjournal/service"
+	"github.com/apoloa/bjournal/view"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"os"

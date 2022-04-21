@@ -1,8 +1,8 @@
 package ui
 
 import (
-	"bjournal/model"
 	"fmt"
+	"github.com/apoloa/bjournal/model"
 	"github.com/derailed/tview"
 
 	"github.com/gdamore/tcell/v2"
