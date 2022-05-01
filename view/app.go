@@ -13,18 +13,28 @@ import (
 	"time"
 )
 
+type SelectedView int
+
+const (
+	Today SelectedView = iota
+	PreviousDate
+	Index
+)
+
 type App struct {
-	logService          *service.LogService
-	prompt              *ui.Prompt
-	buffer              *model.CmdBuff
-	app                 *tview.Application
-	mainFlex            *tview.Flex
-	dailyList           *ui.List
-	previousDayList     *ui.List
-	showingPrompt       bool
-	showPreviousDay     bool
-	selectedPreviousDay bool
-	selectedCategory    *model.Category
+	logService       *service.LogService
+	prompt           *ui.Prompt
+	buffer           *model.CmdBuff
+	app              *tview.Application
+	mainFlex         *tview.Flex
+	dailyList        *ui.List
+	previousDayList  *ui.List
+	indexList        *ui.IndexList
+	showingPrompt    bool
+	showPreviousDay  bool
+	showIndex        bool
+	selectedView     SelectedView
+	selectedCategory *model.Category
 }
 
 func NewApp(logService *service.LogService) *App {
@@ -53,13 +63,26 @@ func (a *App) makeDayFlex(fetchFromCache bool) *tview.Flex {
 		previousList.
 			SetBorder(true).
 			SetTitle(fmt.Sprintf("%02d.%02d %v", previousDate.Date.Day(), previousDate.Date.Month(), utils.ToShortString(timeNow.Weekday())))
-		if a.selectedPreviousDay {
+		if a.selectedView == PreviousDate {
 			previousList.SetBorderColor(tcell.ColorBlue)
 		} else {
 			previousList.SetBorderColor(tcell.ColorWhite)
 		}
 		a.previousDayList = previousList
 		flex.AddItem(previousList, 0, 1, false)
+	}
+	if a.showIndex {
+		indexList := ui.NewIndexList().AddIndexModel(&a.logService.Index)
+		indexList.
+			SetBorder(true).
+			SetTitle("Index")
+		if a.selectedView == Index {
+			indexList.SetBorderColor(tcell.ColorBlue)
+		} else {
+			indexList.SetBorderColor(tcell.ColorWhite)
+		}
+		a.indexList = indexList
+		flex.AddItem(indexList, 0, 1, false)
 	}
 	if fetchFromCache {
 		dl, _ := a.logService.ReadDay(timeNow)
@@ -70,7 +93,7 @@ func (a *App) makeDayFlex(fetchFromCache bool) *tview.Flex {
 			SetTitle(fmt.Sprintf("%02d.%02d %v", dl.Date.Day(), dl.Date.Month(), utils.ToShortString(dl.Date.Weekday())))
 		a.dailyList = list
 	}
-	if !a.selectedPreviousDay {
+	if a.selectedView == Today {
 		a.dailyList.SetBorderColor(tcell.ColorBlue)
 	} else {
 		a.dailyList.SetBorderColor(tcell.ColorWhite)
@@ -125,10 +148,11 @@ func (a *App) Show() {
 			case event.Key() == tcell.KeyRune && event.Rune() == 'c':
 				var actualLog *model.Log
 				var dateTime time.Time
-				if a.selectedPreviousDay {
+				switch a.selectedView {
+				case PreviousDate:
 					actualLog = a.previousDayList.GetCurrentLog()
 					dateTime = a.previousDayList.GetDaily().Date
-				} else {
+				case Today:
 					actualLog = a.dailyList.GetCurrentLog()
 					dateTime = a.dailyList.GetDaily().Date
 				}
@@ -142,10 +166,11 @@ func (a *App) Show() {
 			case event.Key() == tcell.KeyRune && event.Rune() == 'i':
 				var actualLog *model.Log
 				var dateTime time.Time
-				if a.selectedPreviousDay {
+				switch a.selectedView {
+				case PreviousDate:
 					actualLog = a.previousDayList.GetCurrentLog()
 					dateTime = a.previousDayList.GetDaily().Date
-				} else {
+				case Today:
 					actualLog = a.dailyList.GetCurrentLog()
 					dateTime = a.dailyList.GetDaily().Date
 				}
@@ -157,7 +182,7 @@ func (a *App) Show() {
 					}
 				}
 			case event.Key() == tcell.KeyRune && event.Rune() == 'm':
-				if a.selectedPreviousDay {
+				if a.selectedView == PreviousDate {
 					previousLog := a.previousDayList.GetCurrentLog()
 					if previousLog != nil {
 						previousLog.MarkAsMigrated()
@@ -167,26 +192,53 @@ func (a *App) Show() {
 						}
 					}
 				}
-			case event.Key() == tcell.KeyCtrlI:
+			case event.Key() == tcell.KeyEnter:
+				if a.selectedView == Index {
+					indexItem := a.indexList.GetCurrentItem()
+					if indexItem != nil {
+						a.app.Stop()
+						a.logService.OpenIndexItem(*indexItem)
+					}
+				}
+			case event.Key() == tcell.KeyCtrlP:
 				a.showPreviousDay = !a.showPreviousDay
+				if a.showIndex && a.showPreviousDay {
+					a.showIndex = false
+				}
 				a.rebuild(false)
 				if !a.showPreviousDay {
-					a.selectedPreviousDay = false
+					a.selectedView = Today
 				}
+			case event.Key() == tcell.KeyCtrlI:
+				a.showIndex = !a.showIndex
+				if a.showPreviousDay && a.showIndex {
+					a.showPreviousDay = false
+				}
+				a.rebuild(false)
 			case event.Key() == tcell.KeyCtrlJ:
-				if a.showPreviousDay {
-					a.selectedPreviousDay = !a.selectedPreviousDay
-					a.rebuild(true)
+				if a.selectedView != Today {
+					a.selectedView = Today
+				} else {
+					switch {
+					case a.showPreviousDay:
+						a.selectedView = PreviousDate
+					case a.showIndex:
+						a.selectedView = Index
+					}
 				}
+				a.rebuild(true)
 			default:
-				if a.selectedPreviousDay {
+				switch a.selectedView {
+				case PreviousDate:
 					handler := a.previousDayList.InputHandler()
 					handler(event, func(p tview.Primitive) {})
-				} else {
+				case Today:
 					handler := a.dailyList.InputHandler()
 					handler(event, func(p tview.Primitive) {})
+				case Index:
+					handler := a.indexList.InputHandler()
+					handler(event, func(p tview.Primitive) {})
 				}
-
 			}
 		}
 		return event
@@ -207,6 +259,14 @@ func (a *App) BufferActive(state bool) {
 			log.Print("Buffer complete without selected category")
 			os.Exit(101)
 		}
+
+		if a.selectedView == Index && *a.selectedCategory == model.Note {
+			a.app.Stop()
+			text := a.buffer.GetText()
+			a.logService.CreateIndexItem(text)
+			return
+		}
+
 		var selectedLog *model.Log
 		index := a.dailyList.GetCurrentItem()
 		if index >= 0 {
