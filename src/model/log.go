@@ -1,6 +1,8 @@
 package model
 
-import "github.com/apoloa/bjournal/utils"
+import (
+	"github.com/apoloa/bjournal/src/utils"
+)
 
 type Log struct {
 	Parent    *Log     `yaml:"-"`
@@ -52,5 +54,16 @@ func (l *Log) MarkAsIrrelevant() {
 func (l *Log) MarkAsMigrated() {
 	if l.Mark == Task {
 		l.Mark = Migrated
+		for i, _ := range *l.SubLogs {
+			(*l.SubLogs)[i].MarkAsMigrated()
+		}
 	}
+}
+
+func (l *Log) IsATask() bool {
+	return l.Mark == Task
+}
+
+func (l *Log) IsComplete() bool {
+	return l.Mark == Complete
 }

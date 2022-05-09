@@ -2,8 +2,8 @@ package service
 
 import (
 	"fmt"
-	"github.com/apoloa/bjournal/model"
-	"github.com/apoloa/bjournal/utils"
+	model2 "github.com/apoloa/bjournal/src/model"
+	"github.com/apoloa/bjournal/src/utils"
 	"github.com/rs/zerolog/log"
 	"io/ioutil"
 	"os"
@@ -18,29 +18,29 @@ const indexFile = "index.yaml"
 
 type LogService struct {
 	baseDir string
-	cache   map[string]model.DailyLog
-	Index   model.Index
+	cache   map[string]model2.DailyLog
+	Index   model2.Index
 }
 
 func NewLogService(baseDir string) *LogService {
 	return &LogService{
 		baseDir: baseDir,
-		cache:   make(map[string]model.DailyLog),
+		cache:   make(map[string]model2.DailyLog),
 		Index:   readIndex(baseDir),
 	}
 }
 
-func readIndex(baseDir string) model.Index {
+func readIndex(baseDir string) model2.Index {
 	indexPath := path.Join(baseDir, indexFile)
 	data, err := ioutil.ReadFile(indexPath)
 	if err != nil {
 		log.Print("Error reading the index log", err)
-		return model.Index{}
+		return model2.Index{}
 	}
-	index, err := model.IndexFromFile(baseDir, data)
+	index, err := model2.IndexFromFile(baseDir, data)
 	if err != nil {
 		log.Print("Error parsing the index log", err)
-		return model.Index{}
+		return model2.Index{}
 	}
 	return index
 }
@@ -53,40 +53,40 @@ func stringToTime(date string) (time.Time, error) {
 	return time.Parse(layout, date)
 }
 
-func (m *LogService) ReadDay(date time.Time) (model.DailyLog, error) {
+func (m *LogService) ReadDay(date time.Time) (model2.DailyLog, error) {
 	dateString := timeToString(date)
 	if val, ok := m.cache[dateString]; ok {
 		return val, nil
 	} else {
 		dailyLog, err := m.ReadDailyLog(date, dateString)
 		if err != nil {
-			return model.DailyLog{}, err
+			return model2.DailyLog{}, err
 		}
 		m.cache[dateString] = dailyLog
 		return dailyLog, nil
 	}
 }
 
-func (m *LogService) ReadDailyLog(dateTime time.Time, date string) (model.DailyLog, error) {
+func (m *LogService) ReadDailyLog(dateTime time.Time, date string) (model2.DailyLog, error) {
 	filePath := path.Join(m.baseDir, fmt.Sprintf("%v.yaml", date))
 	file, err := ioutil.ReadFile(filePath)
 	if err != nil {
 		log.Print("Error reading the file")
 		log.Print(err.Error())
-		return model.NewDailyLog(date, m.baseDir), nil
+		return model2.NewDailyLog(date, m.baseDir), nil
 	}
-	return model.DailyFrom(file, dateTime, date, m.baseDir)
+	return model2.DailyFrom(file, dateTime, date, m.baseDir)
 }
 
-func (m *LogService) AddNewLog(date time.Time, name string, category model.Category) (model.DailyLog, error) {
+func (m *LogService) AddNewLog(date time.Time, name string, category model2.Category) (model2.DailyLog, error) {
 	dateString := timeToString(date)
 	dailyLog, _ := m.cache[dateString]
-	dailyLog.Logs = append(dailyLog.Logs, model.NewLog(name, category))
+	dailyLog.Logs = append(dailyLog.Logs, model2.NewLog(name, category))
 	m.cache[dateString] = dailyLog
 	return m.SaveLog(date)
 }
 
-func (m *LogService) AppendNewLog(uuid string, date time.Time, name string, category model.Category) (model.DailyLog, error) {
+func (m *LogService) AppendNewLog(uuid string, date time.Time, name string, category model2.Category) (model2.DailyLog, error) {
 	dateString := timeToString(date)
 	dailyLog, _ := m.cache[dateString]
 	for index, appendLog := range dailyLog.Logs {
@@ -94,6 +94,33 @@ func (m *LogService) AppendNewLog(uuid string, date time.Time, name string, cate
 			dailyLog.Logs[index].AppendNewSubLog(name, category)
 		}
 	}
+	m.cache[dateString] = dailyLog
+	return m.SaveLog(date)
+}
+
+func (m *LogService) MoveExistingLog(date time.Time, previousLog model2.Log) (model2.DailyLog, error) {
+	dateString := timeToString(date)
+	dailyLog, _ := m.cache[dateString]
+	if previousLog.IsComplete() {
+		for _, item := range *previousLog.SubLogs {
+			if item.IsATask() {
+				dailyLog.Logs = append(dailyLog.Logs, item)
+			}
+		}
+	} else {
+		// Only keep the task logs.
+		if previousLog.SubLogs != nil {
+			var notDeletedSubLogs []model2.Log
+			for _, item := range *previousLog.SubLogs {
+				if item.IsATask() {
+					notDeletedSubLogs = append(notDeletedSubLogs, item)
+				}
+			}
+			previousLog.SubLogs = &notDeletedSubLogs
+		}
+		dailyLog.Logs = append(dailyLog.Logs, previousLog)
+	}
+
 	m.cache[dateString] = dailyLog
 	return m.SaveLog(date)
 }
@@ -128,24 +155,24 @@ func (m *LogService) getPreviousFileName() (time.Time, string, error) {
 	return startTime, previousFileName, nil
 }
 
-func (m *LogService) GetPreviousDate() (model.DailyLog, error) {
+func (m *LogService) GetPreviousDate() (model2.DailyLog, error) {
 	date, dateString, err := m.getPreviousFileName()
 	if err != nil {
-		return model.DailyLog{}, err
+		return model2.DailyLog{}, err
 	}
 	if val, ok := m.cache[dateString]; ok {
 		return val, nil
 	} else {
 		dailyLog, err := m.ReadDailyLog(date, dateString)
 		if err != nil {
-			return model.DailyLog{}, err
+			return model2.DailyLog{}, err
 		}
 		m.cache[dateString] = dailyLog
 		return dailyLog, nil
 	}
 }
 
-func (m *LogService) SaveLog(date time.Time) (model.DailyLog, error) {
+func (m *LogService) SaveLog(date time.Time) (model2.DailyLog, error) {
 	dateString := timeToString(date)
 	dailyLog, _ := m.cache[dateString]
 	filePath := path.Join(m.baseDir, fmt.Sprintf("%v.yaml", dateString))
@@ -175,7 +202,7 @@ func (m *LogService) SaveIndex() {
 
 }
 
-func (m *LogService) OpenIndexItem(index model.IndexItem) {
+func (m *LogService) OpenIndexItem(index model2.IndexItem) {
 	// TODO: Move the editor to a config file
 	err := utils.RunEditor("nvim", index.FullUrl)
 	if err != nil {
@@ -187,7 +214,7 @@ func (m *LogService) CreateIndexItem(name string) {
 	output := m.escapeName(timeToString(time.Now()), name)
 	output += ".md"
 
-	indexItem := model.NewIndexItem(name, output, m.baseDir)
+	indexItem := model2.NewIndexItem(name, output, m.baseDir)
 
 	_, err := os.Create(indexItem.FullUrl)
 	if err != nil {

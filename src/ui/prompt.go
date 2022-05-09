@@ -3,7 +3,7 @@ package ui
 import (
 	"context"
 	"fmt"
-	"github.com/apoloa/bjournal/model"
+	"github.com/apoloa/bjournal/src/model"
 	"sync"
 
 	"github.com/derailed/tview"

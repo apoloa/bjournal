@@ -2,7 +2,7 @@ package ui
 
 import (
 	"fmt"
-	"github.com/apoloa/bjournal/model"
+	model2 "github.com/apoloa/bjournal/src/model"
 	"github.com/derailed/tview"
 
 	"github.com/gdamore/tcell/v2"
@@ -15,9 +15,9 @@ type List struct {
 	*tview.Box
 
 	// The items of the list.
-	items []*model.Log
+	items []*model2.Log
 
-	daily *model.DailyLog
+	daily *model2.DailyLog
 
 	// The index of the currently selected item.
 	currentItem int
@@ -62,11 +62,11 @@ type List struct {
 
 	// An optional function which is called when the user has navigated to a list
 	// item.
-	changed func(index int, log *model.Log)
+	changed func(index int, log *model2.Log)
 
 	// An optional function which is called when a list item was selected. This
 	// function will be called even if the list item defines its own callback.
-	selected func(index int, log *model.Log)
+	selected func(index int, log *model2.Log)
 
 	// An optional function which is called when the user presses the Escape key.
 	done func()
@@ -288,7 +288,7 @@ func (l *List) SetWrapAround(wrapAround bool) *List {
 //
 // This function is also called when the first item is added or when
 // SetCurrentItem() is called.
-func (l *List) SetChangedFunc(handler func(index int, log *model.Log)) *List {
+func (l *List) SetChangedFunc(handler func(index int, log *model2.Log)) *List {
 	l.changed = handler
 	return l
 }
@@ -297,7 +297,7 @@ func (l *List) SetChangedFunc(handler func(index int, log *model.Log)) *List {
 // list item by pressing Enter on the current selection. The function receives
 // the item's index in the list of items (starting with 0), its main text,
 // secondary text, and its shortcut rune.
-func (l *List) SetSelectedFunc(handler func(int, *model.Log)) *List {
+func (l *List) SetSelectedFunc(handler func(int, *model2.Log)) *List {
 	l.selected = handler
 	return l
 }
@@ -309,7 +309,7 @@ func (l *List) SetDoneFunc(handler func()) *List {
 	return l
 }
 
-func (l *List) AddDailyLog(dailyLog *model.DailyLog) *List {
+func (l *List) AddDailyLog(dailyLog *model2.DailyLog) *List {
 	for index, _ := range dailyLog.Logs {
 		l.InsertItem(-1, &dailyLog.Logs[index], nil)
 	}
@@ -318,7 +318,7 @@ func (l *List) AddDailyLog(dailyLog *model.DailyLog) *List {
 }
 
 // AddItem calls InsertItem() with an index of -1.
-func (l *List) AddItem(log *model.Log, selected func()) *List {
+func (l *List) AddItem(log *model2.Log, selected func()) *List {
 	l.InsertItem(-1, log, selected)
 	return l
 }
@@ -345,7 +345,7 @@ func (l *List) AddItem(log *model.Log, selected func()) *List {
 // The currently selected item will shift its position accordingly. If the list
 // was previously empty, a "changed" event is fired because the new item becomes
 // selected.
-func (l *List) InsertItem(index int, item *model.Log, selected func()) *List {
+func (l *List) InsertItem(index int, item *model2.Log, selected func()) *List {
 	// Shift index to range.
 	if index < 0 {
 		index = len(l.items) + index + 1
@@ -378,7 +378,7 @@ func (l *List) GetItemCount() int {
 
 // GetItem returns an item's. Panics if the index
 // is out of range.
-func (l *List) GetItem(index int) *model.Log {
+func (l *List) GetItem(index int) *model2.Log {
 	if index < 0 {
 		return nil
 	} else if index > len(l.items) {
@@ -387,11 +387,11 @@ func (l *List) GetItem(index int) *model.Log {
 	return l.items[index]
 }
 
-func (l *List) GetDaily() *model.DailyLog {
+func (l *List) GetDaily() *model2.DailyLog {
 	return l.daily
 }
 
-func (l *List) GetCurrentLog() *model.Log {
+func (l *List) GetCurrentLog() *model2.Log {
 	if l.currentItem < 0 {
 		return nil
 	} else if l.currentItem > len(l.items) {
@@ -415,7 +415,7 @@ func (l *List) GetCurrentLog() *model.Log {
 
 // SetItemText sets an item's main and secondary text. Panics if the index is
 // out of range.
-func (l *List) SetItemText(index int, log *model.Log) *List {
+func (l *List) SetItemText(index int, log *model2.Log) *List {
 	l.items[index] = log
 	return l
 }

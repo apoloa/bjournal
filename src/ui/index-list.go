@@ -2,7 +2,7 @@ package ui
 
 import (
 	"fmt"
-	"github.com/apoloa/bjournal/model"
+	model2 "github.com/apoloa/bjournal/src/model"
 	"github.com/derailed/tview"
 	"github.com/gdamore/tcell/v2"
 )
@@ -10,7 +10,7 @@ import (
 type IndexList struct {
 	*tview.Box
 
-	index *model.Index
+	index *model2.Index
 
 	// The index of the currently selected item.
 	currentItem int
@@ -53,11 +53,11 @@ type IndexList struct {
 
 	// An optional function which is called when the user has navigated to a list
 	// item.
-	changed func(index int, log model.IndexItem)
+	changed func(index int, log model2.IndexItem)
 
 	// An optional function which is called when a list item was selected. This
 	// function will be called even if the list item defines its own callback.
-	selected func(index int, log model.IndexItem)
+	selected func(index int, log model2.IndexItem)
 
 	// An optional function which is called when the user presses the Escape key.
 	done func()
@@ -80,12 +80,12 @@ func NewIndexList() *IndexList {
 	}
 }
 
-func (i *IndexList) AddIndexModel(index *model.Index) *IndexList {
+func (i *IndexList) AddIndexModel(index *model2.Index) *IndexList {
 	i.index = index
 	return i
 }
 
-func (i *IndexList) GetCurrentItem() *model.IndexItem {
+func (i *IndexList) GetCurrentItem() *model2.IndexItem {
 	if i.currentItem == -1 || i.currentItem > len(i.index.Items) {
 		return nil
 	}
