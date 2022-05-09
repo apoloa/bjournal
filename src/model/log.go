@@ -54,8 +54,10 @@ func (l *Log) MarkAsIrrelevant() {
 func (l *Log) MarkAsMigrated() {
 	if l.Mark == Task {
 		l.Mark = Migrated
-		for i, _ := range *l.SubLogs {
-			(*l.SubLogs)[i].MarkAsMigrated()
+		if l.SubLogs != nil {
+			for i, _ := range *l.SubLogs {
+				(*l.SubLogs)[i].MarkAsMigrated()
+			}
 		}
 	}
 }

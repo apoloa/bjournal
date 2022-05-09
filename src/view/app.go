@@ -2,9 +2,9 @@ package view
 
 import (
 	"fmt"
-	model2 "github.com/apoloa/bjournal/src/model"
+	"github.com/apoloa/bjournal/src/model"
 	"github.com/apoloa/bjournal/src/service"
-	ui2 "github.com/apoloa/bjournal/src/ui"
+	"github.com/apoloa/bjournal/src/ui"
 	"github.com/apoloa/bjournal/src/utils"
 	"github.com/derailed/tview"
 	"github.com/gdamore/tcell/v2"
@@ -23,23 +23,23 @@ const (
 
 type App struct {
 	logService       *service.LogService
-	prompt           *ui2.Prompt
-	buffer           *model2.CmdBuff
+	prompt           *ui.Prompt
+	buffer           *model.CmdBuff
 	app              *tview.Application
 	mainFlex         *tview.Flex
-	dailyList        *ui2.List
-	previousDayList  *ui2.List
-	indexList        *ui2.IndexList
+	dailyList        *ui.List
+	previousDayList  *ui.List
+	indexList        *ui.IndexList
 	showingPrompt    bool
 	showPreviousDay  bool
 	showIndex        bool
 	selectedView     SelectedView
-	selectedCategory *model2.Category
+	selectedCategory *model.Category
 }
 
 func NewApp(logService *service.LogService) *App {
-	prompt := ui2.NewPrompt(false)
-	buffer := model2.NewCmdBuff('>')
+	prompt := ui.NewPrompt(false)
+	buffer := model.NewCmdBuff('>')
 	mainFlex := tview.NewFlex()
 	mainFlex.SetDirection(tview.FlexRow)
 	prompt.SetModel(buffer)
@@ -59,7 +59,7 @@ func (a *App) makeDayFlex(fetchFromCache bool) *tview.Flex {
 	timeNow := time.Now()
 	if a.showPreviousDay {
 		previousDate, _ := a.logService.GetPreviousDate()
-		previousList := ui2.NewList().AddDailyLog(&previousDate)
+		previousList := ui.NewList().AddDailyLog(&previousDate)
 		previousList.
 			SetBorder(true).
 			SetTitle(fmt.Sprintf("%02d.%02d %v", previousDate.Date.Day(), previousDate.Date.Month(), utils.ToShortString(timeNow.Weekday())))
@@ -72,7 +72,7 @@ func (a *App) makeDayFlex(fetchFromCache bool) *tview.Flex {
 		flex.AddItem(previousList, 0, 1, false)
 	}
 	if a.showIndex {
-		indexList := ui2.NewIndexList().AddIndexModel(&a.logService.Index)
+		indexList := ui.NewIndexList().AddIndexModel(&a.logService.Index)
 		indexList.
 			SetBorder(true).
 			SetTitle("Index")
@@ -86,7 +86,7 @@ func (a *App) makeDayFlex(fetchFromCache bool) *tview.Flex {
 	}
 	if fetchFromCache {
 		dl, _ := a.logService.ReadDay(timeNow)
-		list := ui2.NewList().
+		list := ui.NewList().
 			AddDailyLog(&dl)
 		list.
 			SetBorder(true).
@@ -111,7 +111,7 @@ func (a *App) rebuild(fetchFromCache bool) {
 	itemsFlex := a.makeDayFlex(fetchFromCache)
 	a.mainFlex.Clear()
 	if a.showingPrompt {
-		a.prompt = ui2.NewPrompt(false)
+		a.prompt = ui.NewPrompt(false)
 		a.prompt.SetModel(a.buffer)
 		a.prompt.SetIcon(a.selectedCategory.Print())
 		a.mainFlex.
@@ -134,19 +134,19 @@ func (a *App) Show() {
 		} else {
 			switch {
 			case event.Key() == tcell.KeyRune && event.Rune() == 't':
-				category := model2.Task
+				category := model.Task
 				a.selectedCategory = &category
 				a.showPrompt()
 			case event.Key() == tcell.KeyRune && event.Rune() == 'n':
-				category := model2.Note
+				category := model.Note
 				a.selectedCategory = &category
 				a.showPrompt()
 			case event.Key() == tcell.KeyRune && event.Rune() == 'e':
-				category := model2.Event
+				category := model.Event
 				a.selectedCategory = &category
 				a.showPrompt()
 			case event.Key() == tcell.KeyRune && event.Rune() == 'c':
-				var actualLog *model2.Log
+				var actualLog *model.Log
 				var dateTime time.Time
 				switch a.selectedView {
 				case PreviousDate:
@@ -164,7 +164,7 @@ func (a *App) Show() {
 					}
 				}
 			case event.Key() == tcell.KeyRune && event.Rune() == 'i':
-				var actualLog *model2.Log
+				var actualLog *model.Log
 				var dateTime time.Time
 				switch a.selectedView {
 				case PreviousDate:
@@ -196,6 +196,7 @@ func (a *App) Show() {
 						}
 					}
 				}
+				a.rebuild(true)
 			case event.Key() == tcell.KeyEnter:
 				if a.selectedView == Index {
 					indexItem := a.indexList.GetCurrentItem()
@@ -264,14 +265,14 @@ func (a *App) BufferActive(state bool) {
 			os.Exit(101)
 		}
 
-		if a.selectedView == Index && *a.selectedCategory == model2.Note {
+		if a.selectedView == Index && *a.selectedCategory == model.Note {
 			a.app.Stop()
 			text := a.buffer.GetText()
 			a.logService.CreateIndexItem(text)
 			return
 		}
 
-		var selectedLog *model2.Log
+		var selectedLog *model.Log
 		index := a.dailyList.GetCurrentItem()
 		if index >= 0 {
 			selectedLog = a.dailyList.GetItem(index)
