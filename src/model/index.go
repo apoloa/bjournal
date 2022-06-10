@@ -6,7 +6,7 @@ import (
 )
 
 type Index struct {
-	Items []IndexItem `yaml:"items"`
+	Items []IndexItem `json:"items" yaml:"items"`
 }
 
 func IndexFromFile(basePath string, from []byte) (Index, error) {

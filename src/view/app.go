@@ -58,7 +58,7 @@ func (a *App) makeDayFlex(fetchFromCache bool) *tview.Flex {
 	flex := tview.NewFlex()
 	timeNow := time.Now()
 	if a.showPreviousDay {
-		previousDate, _ := a.logService.GetPreviousDate()
+		previousDate, _ := a.logService.GetPreviousDate(time.Now())
 		previousList := ui.NewList().AddDailyLog(&previousDate)
 		previousList.
 			SetBorder(true).

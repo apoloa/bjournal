@@ -125,7 +125,7 @@ func (m *LogService) MoveExistingLog(date time.Time, previousLog model2.Log) (mo
 	return m.SaveLog(date)
 }
 
-func (m *LogService) getPreviousFileName() (time.Time, string, error) {
+func (m *LogService) getPreviousFileName(from time.Time) (time.Time, string, error) {
 	files, err := ioutil.ReadDir(m.baseDir)
 	if err != nil {
 		log.Print(err)
@@ -133,7 +133,7 @@ func (m *LogService) getPreviousFileName() (time.Time, string, error) {
 	}
 	startTime := time.Time{}
 	previousFileName := ""
-	actualDate := timeToString(time.Now())
+	actualDate := timeToString(from)
 	for _, file := range files {
 		if !file.IsDir() {
 			filename := file.Name()
@@ -155,8 +155,8 @@ func (m *LogService) getPreviousFileName() (time.Time, string, error) {
 	return startTime, previousFileName, nil
 }
 
-func (m *LogService) GetPreviousDate() (model2.DailyLog, error) {
-	date, dateString, err := m.getPreviousFileName()
+func (m *LogService) GetPreviousDate(from time.Time) (model2.DailyLog, error) {
+	date, dateString, err := m.getPreviousFileName(from)
 	if err != nil {
 		return model2.DailyLog{}, err
 	}

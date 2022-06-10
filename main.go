@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/apoloa/bjournal/src/api"
 	"github.com/apoloa/bjournal/src/service"
 	"github.com/apoloa/bjournal/src/view"
 	"github.com/rs/zerolog"
@@ -45,6 +46,11 @@ func main() {
 	log.Logger = log.Output(zerolog.ConsoleWriter{Out: file})
 
 	m := service.NewLogService("/Users/apoloalcaide/Developer/Journal/bullet")
+
+	router := api.NewRouter(8778, m)
+	router.Init()
+	go router.Start()
+
 	app := view.NewApp(m)
 	app.Show()
 }

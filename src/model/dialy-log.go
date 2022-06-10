@@ -11,8 +11,8 @@ import (
 type DailyLog struct {
 	key      string    `yaml:"-"`
 	basePath string    `yaml:"-"`
-	Date     time.Time `yaml:"-"`
-	Logs     []Log     `yaml:"items"`
+	Date     time.Time `json:"-" yaml:"-"`
+	Logs     []Log     `json:"logs" yaml:"items"`
 }
 
 func NewDailyLog(date, basePath string) DailyLog {

@@ -3,9 +3,9 @@ package model
 import "path"
 
 type IndexItem struct {
-	Name    string `yaml:"name"`
-	Url     string `yaml:"url"`
-	FullUrl string `yaml:"-"`
+	Name    string `json:"name" yaml:"name"`
+	Url     string `json:"url" yaml:"url"`
+	FullUrl string `json:"-" yaml:"-"`
 }
 
 func NewIndexItem(name, url, baseUrl string) IndexItem {

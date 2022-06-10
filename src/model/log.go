@@ -5,14 +5,14 @@ import (
 )
 
 type Log struct {
-	Parent    *Log     `yaml:"-"`
-	Id        string   `yaml:"-"`
-	Name      string   `yaml:"name"`
-	Mark      Category `yaml:"mark"`
-	Important bool     `yaml:"important"`
-	Url       *string  `yaml:"url,omitempty"`
-	Text      *string  `yaml:"-"`
-	SubLogs   *[]Log   `yaml:"subLogs,omitempty"`
+	Parent    *Log     `json:"-" yaml:"-"`
+	Id        string   `json:"-" yaml:"-"`
+	Name      string   `json:"name" yaml:"name"`
+	Mark      Category `json:"mark" yaml:"mark"`
+	Important bool     `json:"important" yaml:"important"`
+	Url       *string  `json:"url,omitempty" yaml:"url,omitempty"`
+	Text      *string  `json:"-" yaml:"-"`
+	SubLogs   *[]Log   `json:"sub_logs,omitempty" yaml:"subLogs,omitempty"`
 }
 
 func NewLog(name string, category Category) Log {
