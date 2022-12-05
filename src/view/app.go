@@ -133,19 +133,19 @@ func (a *App) Show() {
 			a.prompt.GetInputCapture()(event)
 		} else {
 			switch {
-			case event.Key() == tcell.KeyRune && event.Rune() == 't':
+			case event.Key() == tcell.KeyRune && event.Rune() == 't': // Create Task
 				category := model.Task
 				a.selectedCategory = &category
 				a.showPrompt()
-			case event.Key() == tcell.KeyRune && event.Rune() == 'n':
+			case event.Key() == tcell.KeyRune && event.Rune() == 'n': // Create Note
 				category := model.Note
 				a.selectedCategory = &category
 				a.showPrompt()
-			case event.Key() == tcell.KeyRune && event.Rune() == 'e':
+			case event.Key() == tcell.KeyRune && event.Rune() == 'e': //Create Event
 				category := model.Event
 				a.selectedCategory = &category
 				a.showPrompt()
-			case event.Key() == tcell.KeyRune && event.Rune() == 'c':
+			case event.Key() == tcell.KeyRune && event.Rune() == 'c': // Complete
 				var actualLog *model.Log
 				var dateTime time.Time
 				switch a.selectedView {
@@ -163,7 +163,7 @@ func (a *App) Show() {
 						log.Print("Error saving log", err)
 					}
 				}
-			case event.Key() == tcell.KeyRune && event.Rune() == 'i':
+			case event.Key() == tcell.KeyRune && event.Rune() == 'i': // Irrelevant
 				var actualLog *model.Log
 				var dateTime time.Time
 				switch a.selectedView {
@@ -181,7 +181,7 @@ func (a *App) Show() {
 						log.Print("Error saving log", err)
 					}
 				}
-			case event.Key() == tcell.KeyRune && event.Rune() == 'm':
+			case event.Key() == tcell.KeyRune && event.Rune() == 'm': // Migrate
 				if a.selectedView == PreviousDate {
 					previousLog := a.previousDayList.GetCurrentLog()
 					if previousLog != nil {
@@ -205,7 +205,7 @@ func (a *App) Show() {
 						a.logService.OpenIndexItem(*indexItem)
 					}
 				}
-			case event.Key() == tcell.KeyCtrlP:
+			case event.Key() == tcell.KeyCtrlP: // Show Previous Day
 				a.showPreviousDay = !a.showPreviousDay
 				if a.showIndex && a.showPreviousDay {
 					a.showIndex = false
@@ -214,13 +214,13 @@ func (a *App) Show() {
 				if !a.showPreviousDay {
 					a.selectedView = Today
 				}
-			case event.Key() == tcell.KeyCtrlI:
+			case event.Key() == tcell.KeyCtrlI: // Show Index
 				a.showIndex = !a.showIndex
 				if a.showPreviousDay && a.showIndex {
 					a.showPreviousDay = false
 				}
 				a.rebuild(false)
-			case event.Key() == tcell.KeyCtrlJ:
+			case event.Key() == tcell.KeyCtrlJ: // Jump between views
 				if a.selectedView != Today {
 					a.selectedView = Today
 				} else {
