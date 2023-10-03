@@ -25,7 +25,7 @@ func NewLog(name string, category Category) Log {
 	}
 }
 
-func (l Log) GetName() string {
+func (l *Log) GetName() string {
 	if l.Mark == Irrelevant {
 		return utils.Strikethrough(l.Name)
 	}
@@ -68,4 +68,8 @@ func (l *Log) IsATask() bool {
 
 func (l *Log) IsComplete() bool {
 	return l.Mark == Complete
+}
+
+func (l *Log) IsMigrated() bool {
+	return l.Mark == Migrated
 }
