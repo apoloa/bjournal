@@ -32,7 +32,7 @@ func NewLogService(baseDir string) *LogService {
 
 func readIndex(baseDir string) model2.Index {
 	indexPath := path.Join(baseDir, indexFile)
-	data, err := ioutil.ReadFile(indexPath)
+	data, err := os.ReadFile(indexPath)
 	if err != nil {
 		log.Print("Error reading the index log", err)
 		return model2.Index{}
@@ -69,7 +69,7 @@ func (m *LogService) ReadDay(date time.Time) (model2.DailyLog, error) {
 
 func (m *LogService) ReadDailyLog(dateTime time.Time, date string) (model2.DailyLog, error) {
 	filePath := path.Join(m.baseDir, fmt.Sprintf("%v.yaml", date))
-	file, err := ioutil.ReadFile(filePath)
+	file, err := os.ReadFile(filePath)
 	if err != nil {
 		log.Print("Error reading the file")
 		log.Print(err.Error())
