@@ -241,9 +241,9 @@ func (a *App) Show() {
 				}
 			case event.Key() == tcell.KeyCtrlI: // Show Index
 				a.showIndex = !a.showIndex
+				a.selectedView = Index
 				if a.showPreviousDay && a.showIndex {
 					a.showPreviousDay = false
-					a.selectedView = Index
 				}
 				a.rebuild(true)
 			case event.Key() == tcell.KeyCtrlJ: // Jump between views
