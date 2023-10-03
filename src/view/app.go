@@ -2,6 +2,8 @@ package view
 
 import (
 	"fmt"
+	"github.com/gdamore/tcell/v2"
+	"log"
 	"os"
 	"time"
 
@@ -10,8 +12,7 @@ import (
 	"github.com/apoloa/bjournal/src/ui"
 	"github.com/apoloa/bjournal/src/utils"
 	"github.com/derailed/tview"
-	"github.com/gdamore/tcell/v2"
-	"github.com/rs/zerolog/log"
+	zerolog "github.com/rs/zerolog/log"
 )
 
 type SelectedView int
@@ -165,7 +166,7 @@ func (a *App) Show() {
 					actualLog.MarkAsComplete()
 					_, err := a.logService.SaveLog(dateTime)
 					if err != nil {
-						log.Print("Error saving log", err)
+						zerolog.Print("Error saving log", err)
 					}
 				}
 			case event.Key() == tcell.KeyRune && event.Rune() == 'i': // Irrelevant
@@ -183,7 +184,7 @@ func (a *App) Show() {
 					actualLog.MarkAsIrrelevant()
 					_, err := a.logService.SaveLog(dateTime)
 					if err != nil {
-						log.Print("Error saving log", err)
+						zerolog.Print("Error saving log", err)
 					}
 				}
 			case event.Key() == tcell.KeyRune && event.Rune() == 'm': // Migrate
@@ -192,12 +193,12 @@ func (a *App) Show() {
 					if previousLog != nil {
 						_, err := a.logService.MoveExistingLog(time.Now(), *previousLog)
 						if err != nil {
-							log.Print("Error saving log", err)
+							zerolog.Print("Error saving log", err)
 						}
 						previousLog.MarkAsMigrated()
 						_, err = a.logService.SaveLog(a.previousDayList.GetDaily().Date)
 						if err != nil {
-							log.Print("Error saving log", err)
+							zerolog.Print("Error saving log", err)
 						}
 					}
 				}
@@ -209,12 +210,12 @@ func (a *App) Show() {
 					for i, _ := range previousLog.Logs {
 						_, err := a.logService.MoveExistingLog(time.Now(), previousLog.Logs[i])
 						if err != nil {
-							log.Print("Error saving log", err)
+							zerolog.Print("Error saving log", err)
 						}
 						previousLog.Logs[i].MarkAsMigrated()
 						_, err = a.logService.SaveLog(a.previousDayList.GetDaily().Date)
 						if err != nil {
-							log.Print("Error saving log", err)
+							zerolog.Print("Error saving log", err)
 						}
 					}
 				}
@@ -233,7 +234,7 @@ func (a *App) Show() {
 				if a.showIndex && a.showPreviousDay {
 					a.showIndex = false
 				}
-				a.rebuild(false)
+				a.rebuild(true)
 				if !a.showPreviousDay {
 					a.selectedView = Today
 				}
@@ -243,7 +244,7 @@ func (a *App) Show() {
 					a.showPreviousDay = false
 					a.selectedView = Index
 				}
-				a.rebuild(false)
+				a.rebuild(true)
 			case event.Key() == tcell.KeyCtrlJ: // Jump between views
 				if a.selectedView != Today {
 					a.selectedView = Today

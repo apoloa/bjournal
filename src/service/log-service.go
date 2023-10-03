@@ -2,6 +2,7 @@ package service
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"path"
 	"path/filepath"
@@ -10,7 +11,7 @@ import (
 
 	model2 "github.com/apoloa/bjournal/src/model"
 	"github.com/apoloa/bjournal/src/utils"
-	"github.com/rs/zerolog/log"
+	zerolog "github.com/rs/zerolog/log"
 )
 
 const layout = "02.01.2006"
@@ -34,12 +35,12 @@ func readIndex(baseDir string) model2.Index {
 	indexPath := path.Join(baseDir, indexFile)
 	data, err := os.ReadFile(indexPath)
 	if err != nil {
-		log.Print("Error reading the index log", err)
+		zerolog.Print("Error reading the index log", err)
 		return model2.Index{}
 	}
 	index, err := model2.IndexFromFile(baseDir, data)
 	if err != nil {
-		log.Print("Error parsing the index log", err)
+		zerolog.Print("Error parsing the index log", err)
 		return model2.Index{}
 	}
 	return index

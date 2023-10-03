@@ -74,6 +74,6 @@ func DailyFrom(from []byte, dateTime time.Time, date string, dir string) (DailyL
 	return dailyLog, nil
 }
 
-func (d DailyLog) ToBytes() ([]byte, error) {
+func (d *DailyLog) ToBytes() ([]byte, error) {
 	return yaml.Marshal(d)
 }
