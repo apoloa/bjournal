@@ -101,7 +101,7 @@ func (m *LogService) AppendNewLog(uuid string, date time.Time, name string, cate
 func (m *LogService) MoveExistingLog(date time.Time, previousLog model2.Log) (model2.DailyLog, error) {
 	dateString := timeToString(date)
 	dailyLog, _ := m.cache[dateString]
-	if previousLog.IsComplete() || previousLog.IsMigrated() {
+	if previousLog.IsComplete() || previousLog.IsMigrated() || previousLog.IsIrrelevant() {
 		if previousLog.SubLogs != nil {
 			for _, item := range *previousLog.SubLogs {
 				if item.IsATask() {

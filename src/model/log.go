@@ -73,3 +73,7 @@ func (l *Log) IsComplete() bool {
 func (l *Log) IsMigrated() bool {
 	return l.Mark == Migrated
 }
+
+func (l *Log) IsIrrelevant() bool {
+	return l.Mark == Irrelevant
+}
