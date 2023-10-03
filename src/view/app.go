@@ -54,22 +54,26 @@ func NewApp(logService *service.LogService) *App {
 	return app
 }
 
+func (a *App) buildPreviousDay(timeNow time.Time) {
+	previousDate, _ := a.logService.GetPreviousDate(time.Now())
+	previousList := ui.NewList().AddDailyLog(&previousDate)
+	previousList.
+		SetBorder(true).
+		SetTitle(fmt.Sprintf("%02d.%02d %v", previousDate.Date.Day(), previousDate.Date.Month(), utils.ToShortString(timeNow.Weekday())))
+	if a.selectedView == PreviousDate {
+		previousList.SetBorderColor(tcell.ColorBlue)
+	} else {
+		previousList.SetBorderColor(tcell.ColorWhite)
+	}
+	a.previousDayList = previousList
+}
+
 func (a *App) makeDayFlex(fetchFromCache bool) *tview.Flex {
 	flex := tview.NewFlex()
 	timeNow := time.Now()
 	if a.showPreviousDay {
-		previousDate, _ := a.logService.GetPreviousDate(time.Now())
-		previousList := ui.NewList().AddDailyLog(&previousDate)
-		previousList.
-			SetBorder(true).
-			SetTitle(fmt.Sprintf("%02d.%02d %v", previousDate.Date.Day(), previousDate.Date.Month(), utils.ToShortString(timeNow.Weekday())))
-		if a.selectedView == PreviousDate {
-			previousList.SetBorderColor(tcell.ColorBlue)
-		} else {
-			previousList.SetBorderColor(tcell.ColorWhite)
-		}
-		a.previousDayList = previousList
-		flex.AddItem(previousList, 0, 1, false)
+		a.buildPreviousDay(timeNow)
+		flex.AddItem(a.previousDayList, 0, 1, false)
 	}
 	if a.showIndex {
 		indexList := ui.NewIndexList().AddIndexModel(&a.logService.Index)
@@ -190,6 +194,23 @@ func (a *App) Show() {
 							log.Print("Error saving log", err)
 						}
 						previousLog.MarkAsMigrated()
+						_, err = a.logService.SaveLog(a.previousDayList.GetDaily().Date)
+						if err != nil {
+							log.Print("Error saving log", err)
+						}
+					}
+				}
+				a.rebuild(true)
+			case event.Key() == tcell.KeyCtrlM:
+				a.buildPreviousDay(time.Now())
+				previousLog := a.previousDayList.GetDaily()
+				if previousLog != nil {
+					for i, _ := range previousLog.Logs {
+						_, err := a.logService.MoveExistingLog(time.Now(), previousLog.Logs[i])
+						if err != nil {
+							log.Print("Error saving log", err)
+						}
+						previousLog.Logs[i].MarkAsMigrated()
 						_, err = a.logService.SaveLog(a.previousDayList.GetDaily().Date)
 						if err != nil {
 							log.Print("Error saving log", err)
