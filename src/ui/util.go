@@ -1,11 +1,12 @@
 package ui
 
 import (
-	"github.com/derailed/tview"
 	"math"
 	"regexp"
 	"sort"
 	"strconv"
+
+	"github.com/derailed/tview"
 
 	"github.com/gdamore/tcell/v2"
 	runewidth "github.com/mattn/go-runewidth"
@@ -568,8 +569,8 @@ func WordWrap(text string, width int) (lines []string) {
 // recognized and substituted by the print functions of this package. For
 // example, to include a tag-like string in a box title or in a TextView:
 //
-//   box.SetTitle(tview.Escape("[squarebrackets]"))
-//   fmt.Fprint(textView, tview.Escape(`["quoted"]`))
+//	box.SetTitle(tview.Escape("[squarebrackets]"))
+//	fmt.Fprint(textView, tview.Escape(`["quoted"]`))
 func Escape(text string) string {
 	return nonEscapePattern.ReplaceAllString(text, "$1[]")
 }

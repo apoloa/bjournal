@@ -2,6 +2,9 @@ package view
 
 import (
 	"fmt"
+	"os"
+	"time"
+
 	"github.com/apoloa/bjournal/src/model"
 	"github.com/apoloa/bjournal/src/service"
 	"github.com/apoloa/bjournal/src/ui"
@@ -9,8 +12,6 @@ import (
 	"github.com/derailed/tview"
 	"github.com/gdamore/tcell/v2"
 	"github.com/rs/zerolog/log"
-	"os"
-	"time"
 )
 
 type SelectedView int

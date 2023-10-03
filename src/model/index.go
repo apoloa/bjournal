@@ -1,8 +1,9 @@
 package model
 
 import (
-	"gopkg.in/yaml.v3"
 	"path"
+
+	"gopkg.in/yaml.v3"
 )
 
 type Index struct {

@@ -1,11 +1,12 @@
 package model
 
 import (
-	"github.com/google/uuid"
-	"gopkg.in/yaml.v3"
 	"io/ioutil"
 	"path"
 	"time"
+
+	"github.com/google/uuid"
+	"gopkg.in/yaml.v3"
 )
 
 type DailyLog struct {

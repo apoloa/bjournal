@@ -2,6 +2,7 @@ package ui
 
 import (
 	"fmt"
+
 	model2 "github.com/apoloa/bjournal/src/model"
 	"github.com/derailed/tview"
 	"github.com/gdamore/tcell/v2"

@@ -3,9 +3,10 @@ package api
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/apoloa/bjournal/src/service"
 	"net/http"
 	"time"
+
+	"github.com/apoloa/bjournal/src/service"
 )
 
 type Router struct {

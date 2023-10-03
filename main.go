@@ -1,14 +1,15 @@
 package main
 
 import (
+	"os"
+	"path"
+	"path/filepath"
+
 	"github.com/apoloa/bjournal/src/api"
 	"github.com/apoloa/bjournal/src/service"
 	"github.com/apoloa/bjournal/src/view"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
-	"os"
-	"path"
-	"path/filepath"
 )
 
 /*

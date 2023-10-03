@@ -1,8 +1,9 @@
 package ui
 
 import (
-	model2 "github.com/apoloa/bjournal/src/model"
 	"testing"
+
+	model2 "github.com/apoloa/bjournal/src/model"
 )
 
 func TestIncreaseIndex(t *testing.T) {

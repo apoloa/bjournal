@@ -2,15 +2,16 @@ package service
 
 import (
 	"fmt"
-	model2 "github.com/apoloa/bjournal/src/model"
-	"github.com/apoloa/bjournal/src/utils"
-	"github.com/rs/zerolog/log"
 	"io/ioutil"
 	"os"
 	"path"
 	"path/filepath"
 	"strings"
 	"time"
+
+	model2 "github.com/apoloa/bjournal/src/model"
+	"github.com/apoloa/bjournal/src/utils"
+	"github.com/rs/zerolog/log"
 )
 
 const layout = "02.01.2006"

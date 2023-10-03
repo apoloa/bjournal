@@ -2,10 +2,11 @@ package ui
 
 import (
 	"context"
-	"github.com/derailed/tview"
-	"github.com/gdamore/tcell/v2"
 	"os"
 	"sync"
+
+	"github.com/derailed/tview"
+	"github.com/gdamore/tcell/v2"
 )
 
 var defStyle = tcell.StyleDefault.Background(tcell.ColorReset).Foreground(tcell.ColorReset)
