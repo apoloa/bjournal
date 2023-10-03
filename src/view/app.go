@@ -202,7 +202,7 @@ func (a *App) Show() {
 					}
 				}
 				a.rebuild(true)
-			case event.Key() == tcell.KeyCtrlM:
+			case event.Key() == tcell.KeyCtrlL:
 				a.buildPreviousDay(time.Now())
 				previousLog := a.previousDayList.GetDaily()
 				if previousLog != nil {
