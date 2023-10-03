@@ -13,6 +13,9 @@ OUTPUT_DIR="./bin/"
 
 FILES		?= $(shell find . -type f -name '*.go' -not -path "./vendor/*")
 
+clean:
+	@rm -rf bin/bj
+
 build:
 	@go build -o bin/bj .
 
