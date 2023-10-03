@@ -2,7 +2,6 @@ package service
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path"
 	"path/filepath"
@@ -47,7 +46,7 @@ func TestSplitCorrectlyFile(t *testing.T) {
 }
 
 func TestLoadPreviousDay(t *testing.T) {
-	dir, err := ioutil.TempDir("", "load_previous_day")
+	dir, err := os.MkdirTemp("", "load_previous_day")
 	assert.Nil(t, err)
 
 	todayPath := path.Join(dir, fmt.Sprintf("%v.yaml", timeToString(time.Now())))

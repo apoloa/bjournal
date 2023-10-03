@@ -2,7 +2,6 @@ package service
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path"
 	"path/filepath"
@@ -102,10 +101,12 @@ func (m *LogService) AppendNewLog(uuid string, date time.Time, name string, cate
 func (m *LogService) MoveExistingLog(date time.Time, previousLog model2.Log) (model2.DailyLog, error) {
 	dateString := timeToString(date)
 	dailyLog, _ := m.cache[dateString]
-	if previousLog.IsComplete() {
-		for _, item := range *previousLog.SubLogs {
-			if item.IsATask() {
-				dailyLog.Logs = append(dailyLog.Logs, item)
+	if previousLog.IsComplete() || previousLog.IsMigrated() {
+		if previousLog.SubLogs != nil {
+			for _, item := range *previousLog.SubLogs {
+				if item.IsATask() {
+					dailyLog.Logs = append(dailyLog.Logs, item)
+				}
 			}
 		}
 	} else {
@@ -127,7 +128,7 @@ func (m *LogService) MoveExistingLog(date time.Time, previousLog model2.Log) (mo
 }
 
 func (m *LogService) getPreviousFileName(from time.Time) (time.Time, string, error) {
-	files, err := ioutil.ReadDir(m.baseDir)
+	files, err := os.ReadDir(m.baseDir)
 	if err != nil {
 		log.Print(err)
 		return time.Now(), "", err
@@ -181,7 +182,7 @@ func (m *LogService) SaveLog(date time.Time) (model2.DailyLog, error) {
 	if err != nil {
 		return dailyLog, err
 	}
-	err = ioutil.WriteFile(filePath, bytes, 0666)
+	err = os.WriteFile(filePath, bytes, 0666)
 	if err != nil {
 		return dailyLog, err
 	}
@@ -195,7 +196,7 @@ func (m *LogService) SaveIndex() {
 		log.Print("Error converting the index log", err, indexPath)
 		return
 	}
-	err = ioutil.WriteFile(indexPath, bytes, 0666)
+	err = os.WriteFile(indexPath, bytes, 0666)
 	if err != nil {
 		log.Print("Error saving the index log", err, indexPath)
 		return
