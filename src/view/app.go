@@ -229,6 +229,7 @@ func (a *App) Show() {
 				}
 			case event.Key() == tcell.KeyCtrlP: // Show Previous Day
 				a.showPreviousDay = !a.showPreviousDay
+				a.selectedView = PreviousDate
 				if a.showIndex && a.showPreviousDay {
 					a.showIndex = false
 				}
@@ -240,6 +241,7 @@ func (a *App) Show() {
 				a.showIndex = !a.showIndex
 				if a.showPreviousDay && a.showIndex {
 					a.showPreviousDay = false
+					a.selectedView = Index
 				}
 				a.rebuild(false)
 			case event.Key() == tcell.KeyCtrlJ: // Jump between views
