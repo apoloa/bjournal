@@ -2,10 +2,11 @@ package view
 
 import (
 	"fmt"
-	"github.com/gdamore/tcell/v2"
 	"log"
 	"os"
 	"time"
+
+	"github.com/gdamore/tcell/v2"
 
 	"github.com/apoloa/bjournal/src/model"
 	"github.com/apoloa/bjournal/src/service"
