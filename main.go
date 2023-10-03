@@ -45,7 +45,7 @@ func main() {
 	}
 	log.Logger = log.Output(zerolog.ConsoleWriter{Out: file})
 
-	m := service.NewLogService("/Users/apoloalcaide/Developer/Journal/bullet")
+	m := service.NewLogService("/Users/apoloalcaide/Developer/Journal")
 
 	router := api.NewRouter(8778, m)
 	router.Init()
